@@ -10,20 +10,20 @@ function App() {
         setDidMount(true)
     }, [])
 
-    useEffect(() => {
-        if (!didMount) {
-            return;
-        }
-        console.log("Initialize websocket connection...");
-        const ws = new WebSocket(`ws://localhost:6543`)
-        setWs(ws)
-        ws.onopen = (e => {
-            ws.send("connect");
-        })
-        ws.onclose = () => {
-            console.log("WS closed...")
-        }
-    }, [didMount])
+    // useEffect(() => {
+    //     if (!didMount) {
+    //         return;
+    //     }
+    //     console.log("Initialize websocket connection...");
+    //     const ws = new WebSocket(`ws://localhost:6543`)
+    //     setWs(ws)
+    //     ws.onopen = (e => {
+    //         ws.send("connect");
+    //     })
+    //     ws.onclose = () => {
+    //         console.log("WS closed...")
+    //     }
+    // }, [didMount])
 
     const sendMessages = () => {
         // ws.send("power!1")

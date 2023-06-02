@@ -10,7 +10,7 @@ export const useWebsocket = ({
     const ws = useMemo(() => new WebSocket(`ws://${host}:${port}`), [reMemoNum]);
 
     const sendMessage = useCallback((commandType, commandValue = '') => {
-        return `${commandType}!${commandValue}`
+        ws.send(`${commandType}!${commandValue}`)
     }, [ws])
 
     const reConnectToWebsocket = () => {

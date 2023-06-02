@@ -14,33 +14,34 @@ export const Controller = () => {
     const [isConnected, setIsConnected] = useState(false);
 
     const {ws, sendMessage} = useWebsocket({host, port, reConnectTimeout,})
+    // console.log("-> ws", ws);
 
     useEffect(() => {
         ws.onopen = () => {
-            sendMessage("connection")
+            sendMessage("connect")
         }
         ws.onmessage = ev => {
-            const message = ev.data;
-            console.log("-> message", message);
-            messageHandler(message)
-            switch (message) {
-                case "connected":
-                    setIsConnected(true)
-                    break;
-                case "connection_failed":
-                    setIsConnected(false)
-                    break;
-                case "invalid_payload":
-                    console.error("Invalid payload")
-                    break;
+            const msg = ev.data;
+            if (msg === "connected") {
+                setIsConnected(true)
             }
+            if (msg.startsWith("{")) {
+                // message is in json format
+                console.log((JSON.parse(msg)))
+            }
+        }
+        ws.onerror = () => {
+
+        }
+        ws.onclose = () => {
+
         }
     }, [ws])
 
     useEffect(() => {
         // Set initial bulb state
         if (isConnected) {
-            // set state
+            sendMessage("state")
         }
     }, [isConnected])
 

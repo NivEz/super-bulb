@@ -1,10 +1,15 @@
 import asyncio
 import websockets
 import os
+import json
+# from dotenv import load_dotenv
 from bulb import initialize_connection
+
+# load_dotenv()
 
 PORT = 6543
 BULB_IP = os.environ.get("BULB_IP")
+RELEVANT_STATE_FIELDS = ["pwr", "brightness", "bulb_colormode", "red", "green", "blue"]
 
 
 async def handler(websocket):
@@ -18,36 +23,40 @@ async def handler(websocket):
                 bulb = initialize_connection(BULB_IP)
                 await websocket.send("connected")
                 continue
-            except Exception:
+            except Exception as e:
                 # send "failed" and continue to next message if exists
                 await websocket.send("connection_failed")
-                print("[] Closing websocket connection with client")
+                print("[] Closing websocket connection with client because of error:")
+                print(e)
                 return None
 
         elif command_type == "state":
-            await websocket.send(str(bulb.get_state()))
+            bulb_state = bulb.get_state()
+            relevant_state_data = {k: bulb_state.get(k) for k in RELEVANT_STATE_FIELDS}
+            await websocket.send(json.dumps(relevant_state_data))
+            continue
 
-        if len(splitted_message) < 2:
+        if len(splitted_message) < 2 or not splitted_message[1]:
             await websocket.send("invalid_payload")
             print("[] Invalid payload")
             continue
 
-        command_value = splitted_message[1]
+        # commands with payloads
+        command_payload = splitted_message[1]
 
         if command_type == "power":
-            bulb.set_state(pwr=int(command_value))
+            bulb.set_state(pwr=int(command_payload))
 
         elif command_type == "brightness":
-            bulb.set_state(brightness=int(command_value))
+            bulb.set_state(brightness=int(command_payload))
 
         elif command_type == "color":
             # color is in RGB
-            r, g, b = command_value.split("-")
+            r, g, b = command_payload.split("-")
             bulb.set_state(red=int(r), green=int(g), blue=int(b))
 
         elif command_type == "colormode":
-            bulb.set_state(bulb_colormode=int(command_value))
-
+            bulb.set_state(bulb_colormode=int(command_payload))
 
         # if got here and no error has been raised - send "ok" message to client
         await websocket.send("ok")
