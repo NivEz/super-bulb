@@ -1,5 +1,5 @@
-import {useEffect, useState} from "react";
-import {Slider} from "./core/Slider.jsx";
+import {useCallback, useEffect, useState} from "react";
+import {Slider} from "./core/Slider/Slider.jsx";
 import {Switch} from "./core/switch/Switch.jsx";
 import {useWebsocket} from "../hooks/useWebsocket.js";
 
@@ -12,6 +12,7 @@ export const Controller = () => {
     const [isConnected, setIsConnected] = useState(false);
     const [bulbState, setBulbState] = useState(null);
     const [power, setPower] = useState(0);
+    const [brightness, setBrightness] = useState(1);
 
     const {ws, sendMessage} = useWebsocket({host, port, reConnectTimeout,})
     // console.log("-> ws", ws);
@@ -26,9 +27,11 @@ export const Controller = () => {
                 setIsConnected(true)
             }
             if (msg.startsWith("{")) {
-                // message is in json format
+                // message is in json format - the only json format message is the state data
                 const state = JSON.parse(msg);
+                console.log("-> state", state);
                 setPower(state.pwr);
+                setBrightness(state.brightness);
                 // setBulbState(state)
             }
         }
@@ -47,21 +50,25 @@ export const Controller = () => {
         }
     }, [isConnected])
 
+    const handlePowerSwitch = useCallback(() => {
+        const newPower = !!power ? 0 : 1
+        setPower(newPower)
+        sendMessage("power", newPower)
+    }, [power])
+
+    const handleBrightness = useCallback(val => {
+        setBrightness(val)
+        sendMessage("brightness", val)
+    }, [brightness])
 
     if (!isConnected) {
         return;
     }
 
-    const handlePowerSwitch = () => {
-        const newPower = !!power ? 0 : 1
-        setPower(newPower)
-        sendMessage("power", newPower)
-    }
-
     return (
         <section>
             <Switch isToggled={!!power} onChange={handlePowerSwitch}/>
-            <Slider/>
+            <Slider defaultValue={brightness} onChange={handleBrightness} disabled={!power}/>
         </section>
     )
 }
