@@ -40,3 +40,8 @@
 .read-the-docs {
   color: #888;
 }
+
+.icon {
+  font-family: 'Material Icons';
+  font-size: 3rem;
+}

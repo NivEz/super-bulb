@@ -1,9 +1,7 @@
 import {useEffect, useState} from "react";
-import {Button} from "./core/Button.jsx";
 import {Slider} from "./core/Slider.jsx";
-import {Icon} from "./core/Icon.jsx";
+import {Switch} from "./core/switch/Switch.jsx";
 import {useWebsocket} from "../hooks/useWebsocket.js";
-import {messageHandler} from "../../utils/messageHandler.js";
 
 // const host = process.env.IP || 'localhost';
 const host = 'localhost';
@@ -12,6 +10,8 @@ const reConnectTimeout = 1000;
 
 export const Controller = () => {
     const [isConnected, setIsConnected] = useState(false);
+    const [bulbState, setBulbState] = useState(null);
+    const [power, setPower] = useState(0);
 
     const {ws, sendMessage} = useWebsocket({host, port, reConnectTimeout,})
     // console.log("-> ws", ws);
@@ -27,7 +27,9 @@ export const Controller = () => {
             }
             if (msg.startsWith("{")) {
                 // message is in json format
-                console.log((JSON.parse(msg)))
+                const state = JSON.parse(msg);
+                setPower(state.pwr);
+                // setBulbState(state)
             }
         }
         ws.onerror = () => {
@@ -45,10 +47,21 @@ export const Controller = () => {
         }
     }, [isConnected])
 
+
+    if (!isConnected) {
+        return;
+    }
+
+    const handlePowerSwitch = () => {
+        const newPower = !!power ? 0 : 1
+        setPower(newPower)
+        sendMessage("power", newPower)
+    }
+
     return (
-        <>
-            <Button/>
+        <section>
+            <Switch isToggled={!!power} onChange={handlePowerSwitch}/>
             <Slider/>
-        </>
+        </section>
     )
 }
