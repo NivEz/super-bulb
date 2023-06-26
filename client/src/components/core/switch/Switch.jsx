@@ -1,15 +1,15 @@
 import styles from "./switch.css"
 
-export const Switch = ({isToggled, onChange}) => {
+export const Switch = ({isToggled, onChange, htmlId}) => {
     return (
         <div className="switch__container">
-            <input id="switch-shadow" className="switch switch--shadow" type="checkbox"
+            <input id={htmlId} className="switch switch--shadow" type="checkbox"
                    checked={isToggled}
                    onChange={() => {
                        onChange && onChange()
                    }
                    }/>
-            <label htmlFor="switch-shadow"></label>
+            <label htmlFor={htmlId}></label>
         </div>
     )
 };

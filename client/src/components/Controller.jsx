@@ -1,7 +1,8 @@
 import {useCallback, useEffect, useState} from "react";
-import {Slider} from "./core/Slider/Slider.jsx";
+import {Slider} from "./core/slider/Slider.jsx";
 import {Switch} from "./core/switch/Switch.jsx";
 import {useWebsocket} from "../hooks/useWebsocket.js";
+import {useAudioAnalyzer} from "../hooks/useAudioAnalyzer.js";
 
 // const host = process.env.IP || 'localhost';
 const host = 'localhost';
@@ -10,11 +11,11 @@ const reConnectTimeout = 1000;
 
 export const Controller = () => {
     const [isConnected, setIsConnected] = useState(false);
-    const [bulbState, setBulbState] = useState(null);
     const [power, setPower] = useState(0);
     const [brightness, setBrightness] = useState(1);
+    const [isInteractive, setIsInteractive] = useState(false);
 
-    const {ws, sendMessage} = useWebsocket({host, port, reConnectTimeout,})
+    const {ws, sendMessage} = useWebsocket({host, port, reConnectTimeout})
 
     useEffect(() => {
         ws.onopen = () => {
@@ -23,6 +24,7 @@ export const Controller = () => {
         ws.onmessage = ev => {
             const msg = ev.data;
             if (msg === "connected") {
+                // TODO - optimize - instead of set state send ws message
                 setIsConnected(true)
             }
             if (msg.startsWith("{")) {
@@ -40,14 +42,16 @@ export const Controller = () => {
         ws.onclose = () => {
 
         }
-    }, [ws])
+    }, [ws]);
 
     useEffect(() => {
         // Set initial bulb state
         if (isConnected) {
             sendMessage("state")
         }
-    }, [isConnected])
+    }, [isConnected]);
+
+    useAudioAnalyzer({isActive: isInteractive, setBrightness});
 
     const handlePowerSwitch = useCallback(() => {
         const newPower = !!power ? 0 : 1
@@ -66,8 +70,10 @@ export const Controller = () => {
 
     return (
         <section>
-            <Switch isToggled={!!power} onChange={handlePowerSwitch}/>
+            <Switch isToggled={!!power} onChange={handlePowerSwitch} htmlId="power-switch-shadow"/>
             <Slider defaultValue={brightness} onChange={handleBrightness} disabled={!power}/>
+            Interactive <Switch isToggled={isInteractive} onChange={() => setIsInteractive(!isInteractive)}
+                    htmlId="interactive-switch-shadow"/>
         </section>
     )
 }
