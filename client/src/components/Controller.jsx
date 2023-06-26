@@ -15,7 +15,6 @@ export const Controller = () => {
     const [brightness, setBrightness] = useState(1);
 
     const {ws, sendMessage} = useWebsocket({host, port, reConnectTimeout,})
-    // console.log("-> ws", ws);
 
     useEffect(() => {
         ws.onopen = () => {
@@ -59,7 +58,7 @@ export const Controller = () => {
     const handleBrightness = useCallback(val => {
         setBrightness(val)
         sendMessage("brightness", val)
-    }, [brightness])
+    }, []);
 
     if (!isConnected) {
         return;
