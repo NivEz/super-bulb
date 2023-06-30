@@ -51,18 +51,18 @@ export const Controller = () => {
         }
     }, [isConnected]);
 
-    useAudioAnalyzer({isActive: isInteractive, setBrightness});
-
     const handlePowerSwitch = useCallback(() => {
         const newPower = !!power ? 0 : 1
         setPower(newPower)
         sendMessage("power", newPower)
-    }, [power])
+    }, [power]);
 
     const handleBrightness = useCallback(val => {
-        setBrightness(val)
-        sendMessage("brightness", val)
+        setBrightness(val);
+        sendMessage("brightness", val);
     }, []);
+
+    useAudioAnalyzer({isActive: isInteractive, handleBrightness});
 
     if (!isConnected) {
         return;

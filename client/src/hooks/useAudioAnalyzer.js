@@ -1,7 +1,8 @@
 import {useEffect} from "react";
+import {useThrottle} from "./useThrottle.js";
 
-export const useAudioAnalyzer = ({isActive, setBrightness}) => {
-
+export const useAudioAnalyzer = ({isActive, handleBrightness}) => {
+    const throttleEventHandler = useThrottle({onChange: handleBrightness, delay: 100});
 
     useEffect(() => {
         if (!isActive) {
@@ -25,16 +26,14 @@ export const useAudioAnalyzer = ({isActive, setBrightness}) => {
                     valuesSum += value;
                 const average = valuesSum / frequencyArray.length;
                 console.log("-> average", Math.floor(average) || 1);
-                setBrightness(Math.floor(average) || 1);
-                // handleBrightness(Math.floor(average))
-            }, 500)
+                throttleEventHandler(Math.floor(average) || 1);
+            }, 25)
 
             var doDraw = function () {
                 requestAnimationFrame(doDraw);
                 analyser.getByteFrequencyData(frequencyArray);
                 const arraySum = frequencyArray.reduce((a, value) => a + value, 0);
                 const average = arraySum / frequencyArray.length;
-                console.log("-> average", average);
                 var adjustedLength;
                 for (var i = 0; i < 255; i++) {
                     adjustedLength = Math.floor(frequencyArray[i]) - (Math.floor(frequencyArray[i]) % 5);
@@ -46,7 +45,7 @@ export const useAudioAnalyzer = ({isActive, setBrightness}) => {
         }
 
         var soundNotAllowed = function (error) {
-            console.log(error);
+            alert("Please allow microphone");
         }
 
         navigator.getUserMedia({audio: true}, soundAllowed, soundNotAllowed);

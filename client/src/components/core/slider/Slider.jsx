@@ -1,5 +1,5 @@
-import React, {useEffect, useMemo, useState} from 'react';
-import {throttle} from "../../../../utils/throttle";
+import React, {useEffect, useState} from 'react';
+import {useThrottle} from "../../../hooks/useThrottle.js";
 
 
 export const Slider = ({defaultValue, onChange, disabled, min = 1, max = 100}) => {
@@ -9,7 +9,7 @@ export const Slider = ({defaultValue, onChange, disabled, min = 1, max = 100}) =
         setValue(defaultValue)
     }, [defaultValue]);
 
-    const throttleEventHandler = useMemo(() => throttle(onChange, 250), []);
+    const throttleEventHandler = useThrottle({onChange});
 
     return (
         <input
