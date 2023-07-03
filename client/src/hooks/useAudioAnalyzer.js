@@ -25,23 +25,8 @@ export const useAudioAnalyzer = ({isActive, handleBrightness}) => {
                 for (const value of frequencyArray)
                     valuesSum += value;
                 const average = valuesSum / frequencyArray.length;
-                console.log("-> average", Math.floor(average) || 1);
                 throttleEventHandler(Math.floor(average) || 1);
-            }, 25)
-
-            var doDraw = function () {
-                requestAnimationFrame(doDraw);
-                analyser.getByteFrequencyData(frequencyArray);
-                const arraySum = frequencyArray.reduce((a, value) => a + value, 0);
-                const average = arraySum / frequencyArray.length;
-                var adjustedLength;
-                for (var i = 0; i < 255; i++) {
-                    adjustedLength = Math.floor(frequencyArray[i]) - (Math.floor(frequencyArray[i]) % 5);
-                    // paths[i].setAttribute('d', 'M '+ (i) +',255 l 0,-' + adjustedLength);
-                }
-
-            }
-            // doDraw();
+            }, 10)
         }
 
         var soundNotAllowed = function (error) {

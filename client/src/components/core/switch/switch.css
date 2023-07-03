@@ -1,9 +1,3 @@
-/* Estilo iOS */
-.switch__container {
-    margin: 8px auto;
-    width: 64px;
-}
-
 .switch {
     visibility: hidden;
     position: absolute;

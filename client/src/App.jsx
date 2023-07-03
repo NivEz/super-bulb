@@ -1,6 +1,6 @@
 import {useEffect, useState} from 'react'
 import './App.css'
-import {Controller} from "./components/Controller";
+import {Controller} from "./components/controller/Controller.jsx";
 
 function App() {
     const [didMount, setDidMount] = useState(null);

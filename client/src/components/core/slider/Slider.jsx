@@ -23,7 +23,7 @@ export const Slider = ({defaultValue, onChange, disabled, min = 1, max = 100}) =
             }}
             value={value}
             style={{
-                width: "75%",
+                width: "65%",
                 ...!disabled && {cursor: "pointer"}
             }}
             disabled={disabled}

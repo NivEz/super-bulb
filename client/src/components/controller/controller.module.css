@@ -1,0 +1,12 @@
+.controllerContainer {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #8e8e8e;
+    border-radius: 8px;
+    max-width: 370px;
+    margin: auto;
+}
+
+.controllerContainer > div:not(:last-child) {
+    border-bottom: 1px solid #d5d5d5;
+}
