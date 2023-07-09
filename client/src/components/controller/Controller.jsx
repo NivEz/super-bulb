@@ -17,6 +17,7 @@ export const Controller = () => {
     const [power, setPower] = useState(0);
     const [brightness, setBrightness] = useState(1);
     const [isInteractive, setIsInteractive] = useState(false);
+    const [transitionDuration, setTransitionDuration] = useState(500);
 
     const {ws, sendMessage} = useWebsocket({host, port, reConnectTimeout})
 
@@ -36,7 +37,7 @@ export const Controller = () => {
                 console.log("-> state", state);
                 setPower(state.pwr);
                 setBrightness(state.brightness);
-                // setBulbState(state)
+                setTransitionDuration(state.transitionduration);
             }
         }
         ws.onerror = () => {
@@ -65,19 +66,21 @@ export const Controller = () => {
         sendMessage("brightness", val);
     }, []);
 
+    const handleTransitionDurationChange = useCallback(val => {
+        setTransitionDuration(val);
+        sendMessage("transition_duration", val);
+    }, []);
+
     useAudioAnalyzer({isActive: isInteractive, handleBrightness});
 
-    if (!isConnected) {
-        return;
-    }
-
     return (
-        <section className={styles.controllerContainer}>
+        <section className={`${styles.controllerContainer} ${!isConnected && styles.cursorWait}`}>
             <Flex label="Power">
                 <Switch
                     isToggled={!!power}
                     onChange={handlePowerSwitch}
                     htmlId="power-switch-shadow"
+                    disabled={!isConnected}
                 />
             </Flex>
             <Flex>
@@ -89,7 +92,19 @@ export const Controller = () => {
                 <Switch
                     isToggled={isInteractive}
                     onChange={() => setIsInteractive(!isInteractive)}
-                    htmlId="interactive-switch-shadow"/>
+                    htmlId="interactive-switch-shadow"
+                    disabled={!power}
+                />
+            </Flex>
+            <Flex label="Transition">
+                <Slider
+                    defaultValue={transitionDuration}
+                    onChange={handleTransitionDurationChange}
+                    min={0}
+                    max={1500}
+                    disabled={!power}
+                />
+                {<span>{isConnected && transitionDuration}</span>}
             </Flex>
         </section>
     )

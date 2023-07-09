@@ -9,7 +9,7 @@ from bulb import initialize_connection
 
 PORT = 6543
 BULB_IP = os.environ.get("BULB_IP")
-RELEVANT_STATE_FIELDS = ["pwr", "brightness", "bulb_colormode", "red", "green", "blue"]
+RELEVANT_STATE_FIELDS = ["pwr", "brightness", "bulb_colormode", "red", "green", "blue", "transitionduration"]
 
 
 async def handler(websocket):
@@ -36,6 +36,8 @@ async def handler(websocket):
             await websocket.send(json.dumps(relevant_state_data))
             continue
 
+        # From this point the messages have multiple values and are needed to be splitted
+
         if len(splitted_message) < 2 or not splitted_message[1]:
             await websocket.send("invalid_payload")
             print("[] Invalid payload")
@@ -57,6 +59,9 @@ async def handler(websocket):
 
         elif command_type == "colormode":
             bulb.set_state(bulb_colormode=int(command_payload))
+
+        elif command_type == "transition_duration":
+            bulb.set_state(transitionduration=int(command_payload))
 
         # if got here and no error has been raised - send "ok" message to client
         await websocket.send("ok")

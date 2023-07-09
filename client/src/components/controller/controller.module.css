@@ -10,3 +10,7 @@
 .controllerContainer > div:not(:last-child) {
     border-bottom: 1px solid #d5d5d5;
 }
+
+.cursorWait * {
+    cursor: wait !important;
+}

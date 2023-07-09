@@ -1,15 +1,19 @@
-import styles from "./switch.css"
+import styles from "./switch.module.css"
 
-export const Switch = ({isToggled, onChange, htmlId}) => {
+export const Switch = ({isToggled, onChange, htmlId, disabled}) => {
     return (
-        <div className="switch__container">
-            <input id={htmlId} className="switch switch--shadow" type="checkbox"
-                   checked={isToggled}
-                   onChange={() => {
-                       onChange && onChange()
-                   }
-                   }/>
+        <>
+            <input
+                id={htmlId}
+                className={`${styles.switch} ${styles.switchShadow}`}
+                type="checkbox"
+                checked={isToggled}
+                onChange={() => {
+                    onChange && onChange()
+                }}
+                disabled={disabled}
+            />
             <label htmlFor={htmlId}></label>
-        </div>
+        </>
     )
 };
