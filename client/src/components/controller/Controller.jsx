@@ -7,6 +7,7 @@ import { useAudioAnalyzer } from "../../hooks/useAudioAnalyzer.js";
 import { Flex } from "../core/flex/Flex";
 import { Symbol } from "../symbol/Symbol";
 import styles from "./controller.module.css";
+import { Credentials } from "../credentials/Credentials.jsx";
 
 // const host = process.env.IP || 'localhost';
 const host = 'localhost';
@@ -20,6 +21,7 @@ export const Controller = () => {
     const [isInteractive, setIsInteractive] = useState(false);
     const [transitionDuration, setTransitionDuration] = useState(500);
     const [isColorMode, setIsColorMode] = useState(false);
+    const [host, setHost] = useState("localhost");
 
     const { ws, sendMessage } = useWebsocket({ host, port, reConnectTimeout })
 
@@ -73,10 +75,15 @@ export const Controller = () => {
         sendMessage("colormode", val ? 0 : 1);
     });
 
+    const onConnect = () => {
+        
+    };
+
     useAudioAnalyzer({ isActive: isInteractive, handleBrightness });
 
     return (
         <section className={`${styles.controllerContainer} ${!isConnected && styles.cursorWait}`}>
+            <Credentials />
             <Flex label="Power">
                 <Switch
                     isToggled={!!power}
