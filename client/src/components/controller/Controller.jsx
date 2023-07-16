@@ -1,10 +1,11 @@
-import {useCallback, useEffect, useState} from "react";
-import {Slider} from "../core/slider/Slider.jsx";
-import {Switch} from "../core/switch/Switch.jsx";
-import {useWebsocket} from "../../hooks/useWebsocket.js";
-import {useAudioAnalyzer} from "../../hooks/useAudioAnalyzer.js";
-import {Flex} from "../core/flex/Flex";
-import {Symbol} from "../symbol/Symbol";
+import { useCallback, useEffect, useState } from "react";
+import { Slider } from "../core/slider/Slider.jsx";
+import { Switch } from "../core/switch/Switch.jsx";
+import { ColorWheel } from "../colorWheel/ColorWheel.jsx";
+import { useWebsocket } from "../../hooks/useWebsocket.js";
+import { useAudioAnalyzer } from "../../hooks/useAudioAnalyzer.js";
+import { Flex } from "../core/flex/Flex";
+import { Symbol } from "../symbol/Symbol";
 import styles from "./controller.module.css";
 
 // const host = process.env.IP || 'localhost';
@@ -18,51 +19,47 @@ export const Controller = () => {
     const [brightness, setBrightness] = useState(1);
     const [isInteractive, setIsInteractive] = useState(false);
     const [transitionDuration, setTransitionDuration] = useState(500);
+    const [isColorMode, setIsColorMode] = useState(false);
 
-    const {ws, sendMessage} = useWebsocket({host, port, reConnectTimeout})
+    const { ws, sendMessage } = useWebsocket({ host, port, reConnectTimeout })
 
     useEffect(() => {
         ws.onopen = () => {
-            sendMessage("connect")
+            sendMessage("connect");
         }
         ws.onmessage = ev => {
             const msg = ev.data;
             if (msg === "connected") {
-                // TODO - optimize - instead of set state send ws message
-                setIsConnected(true)
+                setIsConnected(true);
+                sendMessage("state");
             }
             if (msg.startsWith("{")) {
                 // message is in json format - the only json format message is the state data
                 const state = JSON.parse(msg);
-                console.log("-> state", state);
                 setPower(state.pwr);
-                setBrightness(state.brightness);
+                setBrightness(Number(state.brightness));
                 setTransitionDuration(state.transitionduration);
+                setIsColorMode(state.bulb_colormode === 0 ? true : false);
             }
         }
-        ws.onerror = () => {
-
+        ws.onerror = (err) => {
+            console.error(err);
         }
         ws.onclose = () => {
-
+            setIsConnected(false);
+            setPower(0);
+            alert("Disconnected");
         }
     }, [ws]);
 
-    useEffect(() => {
-        // Set initial bulb state
-        if (isConnected) {
-            sendMessage("state")
-        }
-    }, [isConnected]);
-
     const handlePowerSwitch = useCallback(() => {
-        const newPower = !!power ? 0 : 1
-        setPower(newPower)
-        sendMessage("power", newPower)
+        const newPower = !!power ? 0 : 1;
+        setPower(newPower);
+        sendMessage("power", newPower);
     }, [power]);
 
     const handleBrightness = useCallback(val => {
-        setBrightness(val);
+        setBrightness(Number(val));
         sendMessage("brightness", val);
     }, []);
 
@@ -71,7 +68,12 @@ export const Controller = () => {
         sendMessage("transition_duration", val);
     }, []);
 
-    useAudioAnalyzer({isActive: isInteractive, handleBrightness});
+    const handleColorMode = useCallback(val => {
+        setIsColorMode(val);
+        sendMessage("colormode", val ? 0 : 1);
+    });
+
+    useAudioAnalyzer({ isActive: isInteractive, handleBrightness });
 
     return (
         <section className={`${styles.controllerContainer} ${!isConnected && styles.cursorWait}`}>
@@ -84,9 +86,9 @@ export const Controller = () => {
                 />
             </Flex>
             <Flex>
-                <Symbol symbol="🔆" color="grey"/>
-                <Slider defaultValue={brightness} onChange={handleBrightness} disabled={!power}/>
-                <Symbol symbol="🔆" color="#ffb02e"/>
+                <Symbol symbol="🔆" color="grey" />
+                <Slider defaultValue={brightness} onChange={handleBrightness} disabled={!power} />
+                <Symbol symbol="🔆" color="#ffb02e" />
             </Flex>
             <Flex label="Interactive">
                 <Switch
@@ -106,6 +108,15 @@ export const Controller = () => {
                 />
                 {<span>{isConnected && transitionDuration}</span>}
             </Flex>
+            <Flex label="Color mode">
+                <Switch
+                    isToggled={isColorMode}
+                    onChange={() => handleColorMode(!isColorMode)}
+                    htmlId="colormode-switch-shadow"
+                    disabled={!power}
+                />
+            </Flex>
+            {(isColorMode && power) ? <ColorWheel onChange={rgb => sendMessage("color", Object.values(rgb).join("-"))} /> : null}
         </section>
     )
 }

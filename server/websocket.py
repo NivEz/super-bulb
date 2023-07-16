@@ -14,6 +14,8 @@ RELEVANT_STATE_FIELDS = ["pwr", "brightness", "bulb_colormode", "red", "green", 
 
 async def handler(websocket):
     bulb = None
+    # maintaining brightness state to prevent glitch with color command
+    brightness_state = 0
     async for message in websocket:
         splitted_message = message.split("!")
         command_type = splitted_message[0]
@@ -51,14 +53,17 @@ async def handler(websocket):
 
         elif command_type == "brightness":
             bulb.set_state(brightness=int(command_payload))
+            brightness_state = int(command_payload)
+
+        elif command_type == "colormode":
+            bulb.set_state(bulb_colormode=int(command_payload))
 
         elif command_type == "color":
             # color is in RGB
             r, g, b = command_payload.split("-")
             bulb.set_state(red=int(r), green=int(g), blue=int(b))
-
-        elif command_type == "colormode":
-            bulb.set_state(bulb_colormode=int(command_payload))
+            # from some reason when changing colors it changes the brightness to 100
+            bulb.set_state(brightness=int(brightness_state))
 
         elif command_type == "transition_duration":
             bulb.set_state(transitionduration=int(command_payload))
