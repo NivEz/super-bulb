@@ -8,11 +8,16 @@ import { Flex } from "../core/flex/Flex";
 import { Symbol } from "../symbol/Symbol";
 import styles from "./controller.module.css";
 import { Credentials } from "../credentials/Credentials.jsx";
+import { useLocalStorage } from "../../hooks/useLocalStorage.js";
 
 // const host = process.env.IP || 'localhost';
-const host = 'localhost';
+// const host = 'localhost';
 const port = 6543;
-const reConnectTimeout = 1000;
+const reConnectTimeout = 5000;
+
+const defaultCredentials = JSON.stringify({
+    wsHost: 'localhost',
+});
 
 export const Controller = () => {
     const [isConnected, setIsConnected] = useState(false);
@@ -21,19 +26,24 @@ export const Controller = () => {
     const [isInteractive, setIsInteractive] = useState(false);
     const [transitionDuration, setTransitionDuration] = useState(500);
     const [isColorMode, setIsColorMode] = useState(false);
-    const [host, setHost] = useState("localhost");
+    const [credentials, setCredentials] = useLocalStorage("credentials", defaultCredentials);
 
-    const { ws, sendMessage } = useWebsocket({ host, port, reConnectTimeout })
+    const { ws, sendMessage, reConnectToWebsocket } = useWebsocket({ host: credentials.wsHost, port, reConnectTimeout });
 
     useEffect(() => {
         ws.onopen = () => {
-            sendMessage("connect");
+            const credsCopy = { ...credentials };
+            delete credsCopy.wsHost;
+            const payload = Object.values(credsCopy).join("-");
+            sendMessage("connect", payload);
         }
         ws.onmessage = ev => {
             const msg = ev.data;
             if (msg === "connected") {
                 setIsConnected(true);
                 sendMessage("state");
+            } else if (msg === "connection_failed") {
+                alert("Connection failed");
             }
             if (msg.startsWith("{")) {
                 // message is in json format - the only json format message is the state data
@@ -48,9 +58,11 @@ export const Controller = () => {
             console.error(err);
         }
         ws.onclose = () => {
+            if (isConnected) {
+                alert("Disconnected");
+            }
             setIsConnected(false);
             setPower(0);
-            alert("Disconnected");
         }
     }, [ws]);
 
@@ -58,32 +70,38 @@ export const Controller = () => {
         const newPower = !!power ? 0 : 1;
         setPower(newPower);
         sendMessage("power", newPower);
-    }, [power]);
+    }, [power, sendMessage]);
 
     const handleBrightness = useCallback(val => {
         setBrightness(Number(val));
         sendMessage("brightness", val);
-    }, []);
+    }, [sendMessage]);
 
     const handleTransitionDurationChange = useCallback(val => {
         setTransitionDuration(val);
         sendMessage("transition_duration", val);
-    }, []);
+    }, [sendMessage]);
 
     const handleColorMode = useCallback(val => {
         setIsColorMode(val);
         sendMessage("colormode", val ? 0 : 1);
-    });
+    }, [sendMessage]);
 
-    const onConnect = () => {
-        
+    const handleConnect = (creds = { wsHost, bulbIp, ssid, wifiPassword }) => {
+        setCredentials(creds);
+        reConnectToWebsocket();
     };
 
     useAudioAnalyzer({ isActive: isInteractive, handleBrightness });
 
     return (
         <section className={`${styles.controllerContainer} ${!isConnected && styles.cursorWait}`}>
-            <Credentials />
+            <Credentials
+                connect={handleConnect}
+                defaultWsHost={credentials.wsHost}
+                defaultIp={credentials.bulbIp}
+                defaultSsid={credentials.ssid}
+            />
             <Flex label="Power">
                 <Switch
                     isToggled={!!power}

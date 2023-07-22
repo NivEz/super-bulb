@@ -4,7 +4,7 @@ import { useDidMount } from '../../hooks/useDidMount';
 import {useThrottle} from "../../hooks/useThrottle.js";
 
 
-export const ColorWheel = ({ initialRgb, onChange }) => {
+export const ColorWheel = ({ onChange }) => {
 	const didMount = useDidMount();
     const throttleEventHandler = useThrottle({onChange});
 
