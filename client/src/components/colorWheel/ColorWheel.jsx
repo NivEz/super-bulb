@@ -1,12 +1,13 @@
 import React, { useRef, useMemo } from 'react';
 import iro from '@jaames/iro';
 import { useDidMount } from '../../hooks/useDidMount';
-import {useThrottle} from "../../hooks/useThrottle.js";
+import { useThrottle } from "../../hooks/useThrottle.js";
+import styles from "./colorWheel.module.css";
 
 
 export const ColorWheel = ({ onChange }) => {
 	const didMount = useDidMount();
-    const throttleEventHandler = useThrottle({onChange});
+	const throttleEventHandler = useThrottle({ onChange });
 
 	const colorPickerRef = useRef(null);
 
@@ -22,10 +23,10 @@ export const ColorWheel = ({ onChange }) => {
 		});
 		// Set color on picker change
 		colorPicker.on('input:change', (input) => {
-            throttleEventHandler(input.rgb);
+			throttleEventHandler(input.rgb);
 		});
 		return colorPicker;
 	}, [didMount]);
 
-	return <div ref={colorPickerRef} />;
+	return <div ref={colorPickerRef} className={styles.wheelContainer} />;
 };

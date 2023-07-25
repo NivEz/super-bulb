@@ -5,6 +5,9 @@
     border-radius: 8px;
     max-width: 370px;
     margin: auto;
+    position: relative;
+    overflow: hidden;
+    padding: 1rem 0;
 }
 
 .controllerContainer > div:not(:last-child) {
@@ -13,4 +16,35 @@
 
 .cursorWait * {
     cursor: wait !important;
+}
+
+.settingsBtn {
+    position: relative;
+    padding-bottom: 0.5rem;
+}
+
+.settingsSymbol {
+    position: absolute;
+    left: 0.75rem;
+    z-index: 1;
+    top: -0.75rem;
+}
+
+.fadeIn {
+    transform: translateX(0);
+    transition: 0.5s all ease-in-out;
+}
+
+.settingsFadeOut {
+    transform: translateX(50%);
+    opacity: 0;
+    visibility: hidden;
+    position: absolute;
+}
+
+.controllerFadeOut {
+    transform: translateX(-50%);
+    opacity: 0;
+    visibility: hidden;
+    position: absolute;
 }
