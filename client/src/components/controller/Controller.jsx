@@ -11,10 +11,7 @@ import { Credentials } from "../credentials/Credentials.jsx";
 import { useLocalStorage } from "../../hooks/useLocalStorage.js";
 import { SettingsButton } from "./SettingsButton.jsx";
 
-// const host = process.env.IP || 'localhost';
-// const host = 'localhost';
 const port = 6543;
-const reConnectTimeout = 5000;
 
 const defaultCredentials = JSON.stringify({
     wsHost: 'localhost',
@@ -30,7 +27,7 @@ export const Controller = () => {
     const [credentials, setCredentials] = useLocalStorage("credentials", defaultCredentials);
     const [isSettingsOpen, setIsSettingsOpen] = useState(false);
 
-    const { ws, sendMessage, reConnectToWebsocket } = useWebsocket({ host: credentials.wsHost, port, reConnectTimeout });
+    const { ws, sendMessage, reConnectToWebsocket } = useWebsocket({ host: credentials.wsHost, port });
 
     useEffect(() => {
         ws.onopen = () => {

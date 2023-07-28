@@ -1,20 +1,16 @@
 import asyncio
 import websockets
-import os
 import json
-# from dotenv import load_dotenv
 from bulb import initialize_connection
 
-# load_dotenv()
-
 PORT = 6543
-BULB_IP = os.environ.get("BULB_IP")
 RELEVANT_STATE_FIELDS = ["pwr", "brightness", "bulb_colormode", "red", "green", "blue", "transitionduration"]
 
 
 async def handler(websocket):
     bulb = None
     # maintaining brightness state to prevent glitch with color command
+    # (color commands will change brightness from some reason)
     brightness_state = 0
     async for message in websocket:
         splitted_message = message.split("!")

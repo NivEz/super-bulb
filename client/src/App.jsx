@@ -1,13 +1,13 @@
-import './App.css'
-import {Controller} from "./components/controller/Controller.jsx";
+import './App.css';
+import { Controller } from "./components/controller/Controller.jsx";
 
 function App() {
     return (
         <>
-            <h1>Smart bulb</h1>
+            <h1>Super Bulb</h1>
             <Controller />
         </>
     )
 }
 
-export default App
+export default App;

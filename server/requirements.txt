@@ -1,0 +1,5 @@
+broadlink==0.18.3
+cffi==1.15.1
+cryptography==40.0.2
+pycparser==2.21
+websockets==11.0.3
