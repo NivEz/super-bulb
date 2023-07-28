@@ -1,0 +1,20 @@
+services:
+  client:
+    build:
+      context: ./client
+      dockerfile: Dockerfile
+    image: nivezra/super-bulb-client:latest
+    container_name: super-bulb-client
+    restart: unless-stopped
+    ports:
+      - 8080:80
+
+  server:
+    build:
+      context: ./server
+      dockerfile: Dockerfile
+    image: nivezra/super-bulb-server:latest
+    container_name: super-bulb-server
+    restart: unless-stopped
+    ports:
+      - 6543:6543
