@@ -13,9 +13,9 @@ import { SettingsButton } from "./SettingsButton.jsx";
 
 const port = 6543;
 
-const defaultCredentials = JSON.stringify({
+const defaultCredentials = {
     wsHost: 'localhost',
-});
+};
 
 export const Controller = () => {
     const [isConnected, setIsConnected] = useState(false);
