@@ -1,0 +1,28 @@
+name: Deploy
+
+on:
+  workflow_run:
+    workflows: ["Build and push"]
+    types:
+      - completed
+
+jobs:
+  deploy:
+  runs-on: ubuntu-latest
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    - name: Set up Twingate
+      uses: twingate/github-action@v1
+      with:
+        service-key: ${{ secrets.TWINGATE_KEY }}
+    
+    - name: SCP file
+      uses: appleboy/scp-action@v0.1.4
+      with:
+        host: ${{ secrets.HOST }}
+        username: ${{ secrets.USERNAME }}
+        password: ${{ secrets.PASSWORD }}
+        source: "docker-compose.yaml"
+        target: "~/super-bulb/"
