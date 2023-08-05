@@ -1,0 +1,85 @@
+name: Build and deploy
+
+on:
+  push:
+    branches: [ main ]
+
+env:
+  DOCKER_USERNAME: nivezra
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    env:
+      DOCKER_REPO_CLIENT: nivezra/super-bulb-client
+      DOCKER_REPO_SERVER: nivezra/super-bulb-server
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+      
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          username: ${{ env.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}    
+      
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Build Docker images
+        run: |
+          docker buildx build --platform linux/arm64 -t $DOCKER_REPO_CLIENT:latest --output type=docker ./client
+          docker buildx build --platform linux/arm64 -t $DOCKER_REPO_SERVER:latest --output type=docker ./server
+      
+      - name: Bump version and push tag
+        id: bump
+        uses: anothrNick/github-tag-action@1.64.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          WITH_V: true
+          DEFAULT_BUMP: patch
+      
+      - name: Tag Docker images
+        run: |
+          docker tag $DOCKER_REPO_CLIENT:latest $DOCKER_REPO_CLIENT:${{ steps.bump.outputs.new_tag }}
+          docker tag $DOCKER_REPO_SERVER:latest $DOCKER_REPO_SERVER:${{ steps.bump.outputs.new_tag }}
+      
+      - name: Push Docker images
+        run: |
+          docker push $DOCKER_REPO_CLIENT --all-tags
+          docker push $DOCKER_REPO_SERVER --all-tags
+ 
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Twingate
+        uses: twingate/github-action@v1
+        with:
+          # note that the service key is valid for 365 days
+          service-key: ${{ secrets.TWINGATE_SERVICE_KEY }}
+      
+      - name: SCP docker-compose file
+        uses: appleboy/scp-action@v0.1.4
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          source: "docker-compose.yaml"
+          target: "~/super-bulb/"
+      
+      - name: Deploy containers via SSH
+        uses: appleboy/ssh-action@v1.0.0
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          password: ${{ secrets.PASSWORD }}
+          script: |
+            cd super-bulb
+            docker compose pull
+            docker compose up -d

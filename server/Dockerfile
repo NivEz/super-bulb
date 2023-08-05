@@ -10,4 +10,4 @@ COPY . /app/
 
 EXPOSE 6543
 
-ENTRYPOINT ["python", "websocket.py"]
+CMD ["python", "-u", "websocket.py"]
