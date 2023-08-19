@@ -5,7 +5,10 @@ export const useWebsocket = ({
 }) => {
     const [reMemo, setReMemo] = useState(null);
 
-    const ws = useMemo(() => new WebSocket(`ws://${host}`), [reMemo]);
+    const ws = useMemo(() => {
+        const protocol = location.protocol === "https:" ? "wss" : "ws";
+        return new WebSocket(`${protocol}://${host}`);
+    }, [reMemo])
 
     const sendMessage = useCallback((commandType, commandValue = '') => {
         ws.send(`${commandType}!${commandValue}`);
