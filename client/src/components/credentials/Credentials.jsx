@@ -10,7 +10,7 @@ export const Credentials = ({ connect, defaultWsHost, defaultIp, defaultSsid }) 
     const [wifiPassword, setWifiPassword] = useState("");
     return (
         <form>
-            <label className={styles.formLabel}>Websocket host</label>
+            <label className={styles.formLabel}>Websocket host & port</label>
             <TextInput value={wsHost} onChange={setWsHost} />
             <label className={styles.formLabel}>Bulb IP</label>
             <TextInput value={bulbIp} onChange={setBulbIp} />
