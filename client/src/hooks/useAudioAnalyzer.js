@@ -33,7 +33,11 @@ export const useAudioAnalyzer = ({isActive, handleBrightness}) => {
             alert("Please allow microphone");
         }
 
-        navigator.getUserMedia({audio: true}, soundAllowed, soundNotAllowed);
+        try {
+            navigator.getUserMedia({audio: true}, soundAllowed, soundNotAllowed);
+        } catch (err) {
+            alert("You can use your microphone only from localhost or with secure connection (https)");
+        }
 
         return () => clearInterval(audioInterval);
     }, [isActive])
