@@ -91,7 +91,7 @@ export const Controller = () => {
         reConnectToWebsocket();
     };
 
-    useAudioAnalyzer({ isActive: isInteractive, handleBrightness });
+    useAudioAnalyzer({ isActive: isInteractive, setIsActive: setIsInteractive, handleBrightness });
 
     return (
         <section className={`${styles.controllerContainer} ${!isConnected && styles.cursorWait}`}>

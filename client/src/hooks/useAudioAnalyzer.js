@@ -1,7 +1,7 @@
 import {useEffect} from "react";
 import {useThrottle} from "./useThrottle.js";
 
-export const useAudioAnalyzer = ({isActive, handleBrightness}) => {
+export const useAudioAnalyzer = ({isActive, setIsActive, handleBrightness}) => {
     const throttleEventHandler = useThrottle({onChange: handleBrightness, delay: 100});
 
     useEffect(() => {
@@ -31,13 +31,15 @@ export const useAudioAnalyzer = ({isActive, handleBrightness}) => {
 
         var soundNotAllowed = function (error) {
             alert("Please allow microphone");
+            setIsActive(false);
         }
 
         try {
             navigator.getUserMedia({audio: true}, soundAllowed, soundNotAllowed);
         } catch (err) {
             alert("You can use your microphone only from localhost or with secure connection (https)");
-        }
+            setIsActive(false);
+        };
 
         return () => clearInterval(audioInterval);
     }, [isActive])
